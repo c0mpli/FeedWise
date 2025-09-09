@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "feedwise-backend"
+version = "1.0.0"
+description = "FeedWise Backend API"
+authors = [{name = "FeedWise Team"}]
+requires-python = ">=3.8"
+dependencies = [
+    "flask>=2.0.0",
+    "flask-sqlalchemy>=3.0.0",
+    "requests>=2.25.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=22.0.0",
+    "flake8>=4.0.0",
+    "isort>=5.0.0",
+    "pytest>=6.0.0",
+]
+
+[project.scripts]
+feedwise-dev = "scripts.dev:main"
+feedwise-init-db = "scripts.init_db:main"
+feedwise-test = "scripts.test:main"
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
