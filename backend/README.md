@@ -8,25 +8,38 @@ This backend handles accounts, preferences, recommendations, and feed cleaning w
 ### Prerequisites
 
 - Python 3.8+
-- pip
+- pip or uv (recommended)
 
 ### Quick Start
 
-1. **Install dependencies:**
+1. **Create virtual environment (recommended):**
+
+   ```bash
+   # Using uv (recommended)
+   uv venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   
+   # Or using venv
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   ```
+
+2. **Install dependencies:**
 
    ```bash
    make install
    # or: pip install -r requirements.txt
+   # or: uv pip install -r requirements.txt
    ```
 
-2. **Initialize database:**
+3. **Initialize database:**
 
    ```bash
    make init-db
    # or: python init_database.py
    ```
 
-3. **Start development server:**
+4. **Start development server:**
    ```bash
    make dev
    # or: python app.py
