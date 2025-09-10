@@ -42,11 +42,9 @@ async def login_to_twitter():
     
     Steps:
     1. Go to https://x.com/i/flow/login?lang=en
-    3. Enter the username/email in the username field
-    4. Enter the password in the password field
-    5. Click the login button
-    6. Handle any additional verification steps if they appear
-    7. Wait until successfully logged in and on the main Twitter feed
+    2. Login with the username and password provided
+    3. Handle any additional verification steps if they appear
+    4. Wait until successfully logged in and on the main Twitter feed
     
     If you encounter 2FA or additional verification, wait for manual intervention.
     """
@@ -150,6 +148,5 @@ async def main():
 
 if __name__ == '__main__':
     print("Starting Twitter automation...")
-    print("Make sure to update TWITTER_USERNAME and TWITTER_PASSWORD at the top of this file")
     print()
     asyncio.run(main())
