@@ -10,8 +10,8 @@ load_dotenv()
 
 from browser_use import Agent, Browser, ChatOpenAI
 
-TWITTER_USERNAME = os.getenv("TWITTER_USERNAME", "")
-TWITTER_PASSWORD = os.getenv("TWITTER_PASSWORD", "")
+INSTAGRAM_USERNAME = os.getenv("INSTAGRAM_USERNAME", "")
+INSTAGRAM_PASSWORD = os.getenv("INSTAGRAM_PASSWORD", "")
 POSTS_TO_OPTIMIZE = int(os.getenv("POSTS_TO_OPTIMIZE", "50"))
 INTERESTS = os.getenv("INTERESTS", "development").split(",")
 
@@ -26,86 +26,83 @@ class FeedOptimizationResult(BaseModel):
     feed_relevance_score: int
     recommendations_for_future: List[str]
 
-# browser = Browser(
-#     executable_path='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-#     user_data_dir='~/Library/Application Support/Google/Chrome',
-#     profile_directory='Default',
-# )
+browser = Browser(highlight_elements=True)
 
-async def login_to_twitter():
-    """Login to Twitter using credentials"""
-    
-    login_task = f"""
-    Navigate to twitter.com and log in with the following credentials:
-    Username/Email: {TWITTER_USERNAME}
-    Password: {TWITTER_PASSWORD}
-    
-    Steps:
-    1. Go to https://x.com/i/flow/login?lang=en
-    2. Login with the username and password provided
-    3. Handle any additional verification steps if they appear
-    4. Wait until successfully logged in and on the main Twitter feed
-    
-    If you encounter 2FA or additional verification, wait for manual intervention.
-    """
-    
-    agent = Agent(
-        llm=ChatOpenAI(model='gpt-4o-mini'),
-        task=login_task,
-        # browser=browser,
-        use_vision=True,
-
-    )
-    
-    print("Logging into Twitter...")
-    await agent.run()
-    print("Login completed!")
-
-async def cleanup_explore_feed():
-    """Clean up Twitter explore feed based on interests"""
+async def login_and_optimize_instagram():
+    """Login to Instagram and optimize the explore feed in one seamless flow"""
     
     interests_str = ", ".join(INTERESTS)
     
-    cleanup_task = f"""
-    Clean up the Twitter Explore feed to match these interests: {interests_str}
-    Optimize exactly {POSTS_TO_OPTIMIZE} posts.
+    complete_task = f"""
+    Complete Instagram login and feed optimization task with these credentials and interests:
+    Username: {INSTAGRAM_USERNAME}
+    Password: {INSTAGRAM_PASSWORD}
+    Target interests: {interests_str}
+    Posts to optimize: {POSTS_TO_OPTIMIZE}
     
-    Tasks to perform:
-    1. Navigate to the Explore tab on Twitter
-    2. Look through the trending topics and recommended content
-    3. For each piece of content you see (up to {POSTS_TO_OPTIMIZE} posts total):
-       - If it matches our interests ({interests_str}), engage with it by liking or retweeting
-       - If it doesn't match our interests, use "Not interested" or "Show fewer tweets like this"
-       - Click on relevant hashtags and topics to train the algorithm
-    4. Search for each of our interest topics individually:
-       - Search for "{INTERESTS[0]}"
-       - Like and engage with high-quality tweets
-       - Follow 2-3 relevant accounts posting about this topic
-       - Repeat for other interests: {", ".join(INTERESTS[1:])}
-    5. Go to Twitter Settings > Your account > Account information > Interests
-       - Add/select topics that match our interests: {interests_str}
-       - Remove unrelated interests
-    6. Visit the "Topics" section and follow topics related to our interests
+    PHASE 1: LOGIN
+    1. Go to https://www.instagram.com/accounts/login/
+    2. Enter the username: {INSTAGRAM_USERNAME}
+    3. Enter the password: {INSTAGRAM_PASSWORD}
+    4. Click the "Log In" button
+    5. Handle any additional verification steps if they appear (dismiss "Save Info" prompts)
+    6. Wait until successfully logged in and on the main Instagram feed
     
-    IMPORTANT: Process exactly {POSTS_TO_OPTIMIZE} posts total across all activities.
-    Return structured data about what actions were taken.
+    PHASE 2: GET TOP USERS (research phase)
+    1. Open a new tab and search for top Instagram users in each interest area:
+       - Go to Google or any search engine in the new tab
+       - Search for "top 10 Instagram users for {INTERESTS[0] if INTERESTS else 'development'}"
+       - Find and collect the top 10 usernames for this interest
+       - Repeat for each interest: {", ".join(INTERESTS[1:]) if len(INTERESTS) > 1 else 'No additional interests'}
+       - Store all collected usernames (total of 10 usernames per interest)
+    2. Close the research tab and return to the Instagram tab
+    3. Follow the collected top users:
+       - Use Instagram's search bar to find each collected username
+       - Follow each of these top users
+       - Like 2-3 of their recent posts to signal interest
+    
+    PHASE 3: FEED OPTIMIZATION
+    1. Navigate to the Reels page on Instagram (click the reels/video icon at /reels)
+    2. Optimize the Reels feed by looking through the reels and recommended content
+    3. For each reel you see (up to {POSTS_TO_OPTIMIZE} reels total):
+       - If it matches our interests ({interests_str}), engage with it by liking, saving, or sharing
+       - If it doesn't match our interests, click the "Not Interested" option (three dots menu)
+       - Click on relevant hashtags and topics in the reel descriptions to train the algorithm
+       - IMPORTANT: After every 5 reel interactions, refresh the page to get fresh content
+    4. Search for each of our interest topics individually in Reels:
+       - Use the search bar to search for "{INTERESTS[0] if INTERESTS else 'development'}" and filter by Reels
+       - Like and engage with high-quality reels about this topic
+       - Follow 2-3 more relevant accounts creating reels about this topic
+       - Refresh the page after every 5 interactions here as well
+       - Repeat for other interests: {", ".join(INTERESTS[1:]) if len(INTERESTS) > 1 else 'No additional interests'}
+    5. Go to your Profile > Settings > Account > Interests (if available)
+       - Add topics that match our interests: {interests_str}
+       - Remove unrelated interests if possible
+    6. Follow relevant hashtags related to our interests
+    
+    IMPORTANT NOTES:
+    - Follow the exact login sequence: username → next → password → login
+    - If you encounter 2FA or additional verification, wait for manual intervention
+    - Process exactly {POSTS_TO_OPTIMIZE} posts total across all feed optimization activities
+    - Complete both phases in one continuous session
+    - Return structured data about what actions were taken during optimization
     """
     
     agent = Agent(
         llm=ChatOpenAI(model='gpt-4o-mini'),
-        task=cleanup_task,
-        # browser=browser,
+        task=complete_task,
+        browser=browser,
         output_model_schema=FeedOptimizationResult,
         use_vision=True,
     )
     
-    print("Cleaning up explore feed based on interests...")
+    print("Starting Instagram login and feed optimization...")
     history = await agent.run()
     result = history.final_result()
     
     if result:
         parsed = FeedOptimizationResult.model_validate_json(result)
-        print(f"\nFeed optimization completed!")
+        print(f"\nInstagram optimization completed!")
         print(f"Interests processed: {parsed.interests_processed}")
         print(f"Actions taken: {len(parsed.actions_taken)}")
         print(f"Feed relevance score: {parsed.feed_relevance_score}/100")
@@ -121,21 +118,18 @@ async def cleanup_explore_feed():
     return None
 
 async def main():
-    """Main Twitter automation function"""
+    """Main Instagram automation function"""
     try:
-        print("=== Twitter Feed Automation ===")
+        print("=== Instagram Feed Automation ===")
         print(f"Target interests: {', '.join(INTERESTS)}")
         print()
         
-        # Step 1: Login to Twitter
-        await login_to_twitter()
-        
-        # Step 2: Clean up explore feed based on interests
-        result = await cleanup_explore_feed()
+        # Complete login and feed optimization in one flow
+        result = await login_and_optimize_instagram()
         
         if result:
             print("\n=== Automation Complete ===")
-            print("Your Twitter explore feed has been optimized!")
+            print("Your Instagram explore feed has been optimized!")
         else:
             print("\n=== Automation Failed ===")
             print("Could not complete feed optimization")
@@ -147,6 +141,6 @@ async def main():
         print("\nClosing browser...")
 
 if __name__ == '__main__':
-    print("Starting Twitter automation...")
+    print("Starting Instagram automation...")
     print()
     asyncio.run(main())
